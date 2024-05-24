@@ -7,7 +7,7 @@ MESSAGE (STATUS "Complex CMake Begin")
 cmake_minimum_required(VERSION 3.10)
 
 add_library(simplexBase STATIC simplexBase.cpp simplexBase.hpp)
-target_link_libraries(simplexBase PUBLIC utils pipePacket simplexArrayList alphaComplex witnessComplex)
+target_link_libraries(simplexBase PUBLIC utils pipePacket simplexArrayList alphaComplex betaComplex simplexTree witnessComplex)
 target_include_directories(simplexBase PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/Utils)
 
 add_library(simplexArrayList STATIC simplexArrayList.cpp simplexArrayList.hpp)
@@ -21,10 +21,18 @@ target_include_directories(alphaComplex PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(witnessComplex STATIC witnessComplex.cpp witnessComplex.hpp)
 target_link_libraries(witnessComplex PUBLIC simplexArrayList simplexBase)
 target_include_directories(witnessComplex PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-#add_library(simplexTree "simplexTree.cpp" "simplexTree.hpp")
 
-install(TARGETS simplexBase simplexArrayList alphaComplex witnessComplex DESTINATION lib)
-install(FILES simplexBase.hpp simplexArrayList.hpp alphaComplex.hpp witnessComplex.hpp DESTINATION include)
+add_library(simplexTree STATIC simplexTree.cpp simplexTree.hpp)
+target_link_libraries(simplexTree PUBLIC utils kdTree simplexBase)
+target_include_directories(simplexTree PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_library(betaComplex STATIC betaComplex.cpp betaComplex.hpp)
+target_link_libraries(betaComplex PUBLIC utils alphaComplex simplexArrayList simplexBase)
+target_include_directories(betaComplex PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+INSTALL (TARGETS simplexBase
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib)
 
 # TODO: Add tests and install targets if needed.
 

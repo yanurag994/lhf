@@ -10,7 +10,7 @@ target_link_libraries(preprocessor PUBLIC kMeansPlusPlus pipePacket)
 target_include_directories(preprocessor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(kMeansPlusPlus STATIC kMeansPlusPlus.cpp kMeansPlusPlus.hpp)
-target_link_libraries(kMeansPlusPlus PUBLIC utils preprocessor)
+target_link_libraries(kMeansPlusPlus PUBLIC utils cluster preprocessor)
 target_include_directories(kMeansPlusPlus PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(streamingKmeans STATIC streamingKmeans.cpp streamingKmeans.hpp)
@@ -38,7 +38,6 @@ INSTALL (TARGETS preprocessor
 	ARCHIVE DESTINATION lib)
 
 # TODO: Add tests and install targets if needed.
-
 MESSAGE (STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})
 MESSAGE (STATUS "FLAGS: " ${CMAKE_CXX_FLAGS})
 
