@@ -5,7 +5,7 @@ MESSAGE(STATUS "Main CMake Begin")
 
 cmake_minimum_required(VERSION 3.11)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_LIBRARIES "-lpthread")
 
 enable_testing()
@@ -25,7 +25,6 @@ elseif(APPLE)
     set (OpenMP_omp_LIBRARY "/opt/homebrew/opt/libomp/lib/libomp.dylib")
     include_directories(/opt/homebrew/opt/libomp/include)
     include_directories(/opt/homebrew/include)
-    message(STATUS ">>> Apple Silicon MacOS")
     link_libraries("-undefined dynamic_lookup")
     message(STATUS ">>> MacOS")
 else()
