@@ -1,0 +1,39 @@
+name: Build Manylinux Image
+
+on:
+  push:
+    branches:
+      - master
+      - ManyLinux-Build
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Build the Docker image
+      run: |
+        cd pyLHF
+        docker build . -t lhf
+
+    - name: Ensure permissions
+      run: |
+        mkdir -p temp
+        chmod -R 777 temp
+
+    - name: Compile LHF and Build Wheel Package
+      run: |        
+        docker run --name lhf-container lhf
+        docker cp lhf-container:/lhf/pyLHF/src/wheelhouse/lhf-2.0.1-py3-none-manylinux_2_24_x86_64.whl temp/
+        docker stop lhf-container
+        docker rm lhf-container
+
+    - name: Upload GitHub artifact for PYPA Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: lhf-2.0.1-py3-none-manylinux_2_24_x86_64.whl
+        path: temp/lhf-2.0.1-py3-none-manylinux_2_24_x86_64.whl
+        retention-days: 5
