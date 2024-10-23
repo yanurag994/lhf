@@ -91,11 +91,11 @@ target_link_libraries(slidingWindow PUBLIC basePipe readInput utils)
 target_include_directories(slidingWindow PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(fastPersistence STATIC "fastPersistence.cpp" "fastPersistence.hpp")
-target_link_libraries(fastPersistence PUBLIC basePipe utils)
+target_link_libraries(fastPersistence PUBLIC basePipe utils unionFind)
 target_include_directories(fastPersistence PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(incrementalPersistence STATIC "incrementalPersistence.cpp" "incrementalPersistence.hpp")
-target_link_libraries(incrementalPersistence PUBLIC basePipe simplexBase simplexArrayList utils)
+target_link_libraries(incrementalPersistence PUBLIC basePipe simplexBase simplexArrayList utils unionFind)
 target_include_directories(incrementalPersistence PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(naiveWindow STATIC "naiveWindow.cpp" "naiveWindow.hpp")
@@ -115,12 +115,13 @@ if(APPLE)
 endif()
 
 add_library(incrementalPipe STATIC "incrementalPipe.cpp" "incrementalPipe.hpp")
-if(TBB_FOUND)
-target_link_libraries(incrementalPipe PUBLIC basePipe utils OpenMP::OpenMP_CXX TBB::tbb)
-else()
 target_link_libraries(incrementalPipe PUBLIC basePipe utils OpenMP::OpenMP_CXX)
-endif()
 target_include_directories(incrementalPipe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${EIGEN3_INCLUDE_DIR})
+
+if(TBB_FOUND)
+target_link_libraries(incrementalPipe PUBLIC TBB::tbb)
+endif()
+
 
 INSTALL (TARGETS basePipe
 	LIBRARY DESTINATION lib
