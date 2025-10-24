@@ -23,7 +23,7 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-          #- windows-latest
+          - windows-latest
         exclude:
           - os: ubuntu-latest
             mpi: msmpi #MSMPI only exists on windows
@@ -36,8 +36,11 @@ jobs:
             ##TODO: Test with windows-latest and msmpi
     
     steps:
-    # Get dependencies
-    
+    - uses: actions/checkout@v4
+
+    # ------------------------------------------------------------
+    # Linux Setup
+    # ------------------------------------------------------------
     - name: Linux Apt update (${{ matrix.os }} , ${{ matrix.mpi }})
       if:   contains(matrix.os,'ubuntu')
       run:  sudo apt-get update
@@ -49,7 +52,10 @@ jobs:
     - name: Get Linux MPICH dependencies (${{ matrix.os }} , ${{ matrix.mpi }})
       if:   contains(matrix.os,'ubuntu') && contains(matrix.mpi,'mpich')
       run:  sudo apt-get install -y mpich cppcheck libeigen3-dev libcgal-dev
-      
+
+    # ------------------------------------------------------------
+    # macOS Setup
+    # ------------------------------------------------------------
     - name: Get MacOS OpenMPI dependencies (${{ matrix.os }} , ${{ matrix.mpi }})
       if:   contains(matrix.os,'macos') && contains(matrix.mpi,'openmpi')
       run:  brew install gcc openmpi libomp eigen cgal
@@ -58,32 +64,41 @@ jobs:
       if:   contains(matrix.os,'macos') && contains(matrix.mpi,'mpich')
       run:  brew install gcc mpich libomp eigen cgal
 
-    - name: Windows install CGAL 
-      if:   contains(matrix.os,'windows-latest')
-      run:  vcpkg update && vcpkg install cgal eigen3 msmpi
+    # ------------------------------------------------------------
+    # Windows Setup (vcpkg)
+    # ------------------------------------------------------------
+    - name: Cache vcpkg binaries
+      if: contains(matrix.os, 'windows-latest')
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+        restore-keys: |
+          vcpkg-${{ runner.os }}-
 
-    # Checkout v2 : https://github.com/actions/checkout
-    - uses: actions/checkout@v4
-      
-    # Check CMake Version 
-    - name: Check CMake (${{ matrix.mpi }})
+    # ------------------------------------------------------------
+    # 🔧 Configure and Build (All Platforms)
+    # ------------------------------------------------------------
+
+    - name: Check CMake version
       run: cmake --version
 
-    - name: Set MacOS Compilers
-      if:   contains(matrix.os,'macos')
-      env:
-        CC: /usr/bin/gcc
-        CXX: /usr/bin/g++
-      run:  echo "Using CC=${CC} and CXX=${CXX}"
-      
-    # Make the project
-    - name: cmake
-      run: cmake . && make
-  
-    # Run cmake tests
-    - name: ctest
-      run: make test
-    
-    - name: cppcheck
-      if:   runner.os == 'Linux'
-      run:  cppcheck --enable=all --force .
+    # Configure via preset (instead of -D flags)
+    - name: Configure CMake
+      run: |
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          cmake --preset windows-release
+        else
+          cmake --preset release
+        fi
+      shell: bash
+
+    # Build using preset with parallel jobs
+    - name: Build project
+      run: |
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          cmake --build --preset windows-release --parallel 4
+        else
+          cmake --build --preset release --parallel 4
+        fi
+      shell: bash

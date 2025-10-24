@@ -1,0 +1,18 @@
+{
+  "name": "lhf",
+  "version": "0.1.0",
+  "dependencies": [
+    {
+      "name": "cgal",
+      "default-features": true
+    },
+    {
+      "name": "eigen3"
+    },
+    {
+      "name": "msmpi",
+      "platform": "windows"
+    }
+  ],
+  "builtin-baseline": "latest"
+}
